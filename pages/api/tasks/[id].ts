@@ -1,5 +1,5 @@
-import dbConnect from '@/lib/dbConnect';
-import Task from '@/models/Task';
+import dbConnect from '../../../lib/dbConnect';
+import Task from '../../../models/Task';
 import type { NextApiRequest, NextApiResponse } from 'next';
 import mongoose from 'mongoose';
 
