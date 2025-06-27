@@ -107,15 +107,9 @@ jobs:
     - name: Build application
       run: npm run build
     
-    - name: Install additional tools
+    - name: Install Keploy CLI
       run: |
-        sudo apt-get update
-        sudo apt-get install -y jq curl
-    
-    - name: Install Keploy
-      run: |
-        curl -s https://raw.githubusercontent.com/keploy/keploy/main/install.sh | bash
-        echo "$HOME/.keploy/bin" >> $GITHUB_PATH
+        curl --silent -L https://keploy.io/ent/install.sh | bash
     
     - name: Start MongoDB and wait for it to be ready
       run: |
@@ -129,7 +123,7 @@ jobs:
         export NODE_ENV=test
         npm run dev &
         echo $! > app.pid
-        sleep 15  # Wait longer for app to start
+        sleep 15  # Wait for app to start
         
         # Check if app is running
         if curl -f http://localhost:3000/api/tasks > /dev/null 2>&1; then
@@ -139,86 +133,11 @@ jobs:
           exit 1
         fi
     
-    - name: Record API interactions with Keploy
+    - name: Run Keploy Test Suite
       run: |
-        export MONGODB_URI=mongodb://localhost:27017/task-management-test
-        export NODE_ENV=test
-        
-        # Record API calls
-        keploy record --config keploy.yaml &
-        sleep 5
-        
-        # Make API calls to record interactions
-        echo "Recording API interactions..."
-        
-        # Create a task
-        curl -X POST http://localhost:3000/api/tasks \
-          -H "Content-Type: application/json" \
-          -d '{"title": "Test Task for Recording"}' \
-          -w "\nHTTP Status: %{http_code}\n"
-        
-        # Get all tasks
-        curl -X GET http://localhost:3000/api/tasks \
-          -H "Content-Type: application/json" \
-          -w "\nHTTP Status: %{http_code}\n"
-        
-        # Get the created task (we'll need to extract the ID)
-        TASK_ID=$(curl -s -X GET http://localhost:3000/api/tasks | jq -r '.[0]._id')
-        echo "Task ID: $TASK_ID"
-        
-        if [ "$TASK_ID" != "null" ] && [ -n "$TASK_ID" ]; then
-          # Get specific task
-          curl -X GET http://localhost:3000/api/tasks/$TASK_ID \
-            -H "Content-Type: application/json" \
-            -w "\nHTTP Status: %{http_code}\n"
-          
-          # Update task
-          curl -X PUT http://localhost:3000/api/tasks/$TASK_ID \
-            -H "Content-Type: application/json" \
-            -d '{"title": "Updated Test Task", "completed": true}' \
-            -w "\nHTTP Status: %{http_code}\n"
-          
-          # Delete task
-          curl -X DELETE http://localhost:3000/api/tasks/$TASK_ID \
-            -H "Content-Type: application/json" \
-            -w "\nHTTP Status: %{http_code}\n"
-        fi
-        
-        # Stop recording
-        pkill -f "keploy record"
-        sleep 5
-    
-    - name: Run Keploy tests
-      run: |
-        export MONGODB_URI=mongodb://localhost:27017/task-management-test
-        export NODE_ENV=test
-        
-        # Create test-reports directory
-        mkdir -p test-reports
-        
-        # Run Keploy tests
-        echo "Running Keploy API tests..."
-        keploy test --config keploy.yaml --report-format json --report-output ./test-reports || {
-          echo "Keploy tests failed, but continuing..."
-          # Create a basic test report if Keploy fails
-          echo '{"status": "completed", "tests": [], "summary": {"passed": 0, "failed": 0}}' > ./test-reports/test-report.json
-        }
-        
-        # Check if tests passed
-        if [ -f "./test-reports/test-report.json" ]; then
-          echo "Test report generated successfully"
-          cat ./test-reports/test-report.json | jq '.' || echo "Could not parse test report"
-        else
-          echo "No test report found, creating basic report"
-          echo '{"status": "completed", "tests": [], "summary": {"passed": 0, "failed": 0}}' > ./test-reports/test-report.json
-        fi
-    
-    - name: Upload test reports
-      uses: actions/upload-artifact@v4
-      with:
-        name: keploy-test-reports
-        path: test-reports/
-        retention-days: 30
+        export KEPLOY_API_KEY=${{ secrets.KEPLOY_API_KEY }}
+        # Note: Replace with your actual app ID and base path from Keploy Dashboard
+        keploy test-suite --app=your-app-id --base-path http://localhost:3000/api --cloud
     
     - name: Stop application
       if: always()
@@ -235,12 +154,6 @@ jobs:
     if: always()
     
     steps:
-    - name: Download test reports
-      uses: actions/download-artifact@v4
-      with:
-        name: keploy-test-reports
-        path: test-reports/
-    
     - name: Generate test summary
       run: |
         echo "## 🧪 Test Summary" >> $GITHUB_STEP_SUMMARY
@@ -248,13 +161,10 @@ jobs:
         echo "### Unit Tests" >> $GITHUB_STEP_SUMMARY
         echo "- Status: ${{ needs.unit-tests.result }}" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
-        echo "### API Tests (Keploy)" >> $GITHUB_STEP_SUMMARY
+        echo "### API Tests (Keploy Cloud)" >> $GITHUB_STEP_SUMMARY
         echo "- Status: ${{ needs.api-testing.result }}" >> $GITHUB_STEP_SUMMARY
-        if [ -f "test-reports/test-report.json" ]; then
-          echo "- Report: Generated successfully" >> $GITHUB_STEP_SUMMARY
-        else
-          echo "- Report: Not available" >> $GITHUB_STEP_SUMMARY
-        fi
+        echo "- Platform: Keploy AI API Testing Cloud" >> $GITHUB_STEP_SUMMARY
+        echo "- Dashboard: https://app.keploy.io" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
         echo "### Overall Status" >> $GITHUB_STEP_SUMMARY
         if [ "${{ needs.unit-tests.result }}" == "success" ] && [ "${{ needs.api-testing.result }}" == "success" ]; then

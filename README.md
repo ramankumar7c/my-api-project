@@ -80,6 +80,7 @@ Visit `http://localhost:3000` to see the application.
 - **React Frontend** with complete CRUD operations
 - **TypeScript** for type safety
 - **Tailwind CSS** for styling
+- **AI-powered API testing with Keploy**
 
 ## API Documentation
 
@@ -349,3 +350,93 @@ This project is open source and available under the [MIT License](LICENSE).
 
 **Author:** [Raman Kumar]  
 **GitHub:** [https://github.com/ramankumar7c](https://github.com/ramankumar7c)
+
+## API Testing with Keploy
+
+This project integrates **Keploy AI API Testing** for intelligent API testing in the CI/CD pipeline.
+
+### Setup Instructions
+
+1. **Create Keploy Account**
+   - Go to [app.keploy.io](https://app.keploy.io)
+   - Sign up and create a new account
+
+2. **Create Test Suite**
+   - Navigate to "Test Suite" in the sidebar
+   - Create a new test suite for your API
+   - Copy your App ID from the dashboard
+
+3. **Configure GitHub Secrets**
+   - Go to your repository → Settings → Security → Actions
+   - Add new repository secret: `KEPLOY_API_KEY`
+   - Get your API key from the Keploy dashboard
+
+4. **Update CI/CD Configuration**
+   - Replace `your-app-id` in `.github/workflows/ci-cd.yml` with your actual App ID
+   - The base path should be: `http://localhost:3000/api`
+
+### Current Configuration
+
+```yaml
+- name: Run Keploy Test Suite
+  run: |
+    export KEPLOY_API_KEY=${{ secrets.KEPLOY_API_KEY }}
+    keploy test-suite --app=your-app-id --base-path http://localhost:3000/api --cloud
+```
+
+**⚠️ Important**: Replace `your-app-id` with your actual Keploy App ID from the dashboard.
+
+### Test Reports
+
+- **Dashboard**: View detailed test reports at [app.keploy.io](https://app.keploy.io)
+- **CI/CD**: Test results are displayed in GitHub Actions logs
+- **Real-time**: Tests run in the cloud with AI-powered analysis
+
+## API Endpoints
+
+- `GET /api/tasks` - Get all tasks
+- `POST /api/tasks` - Create a new task
+- `GET /api/tasks/[id]` - Get a specific task
+- `PUT /api/tasks/[id]` - Update a task
+- `DELETE /api/tasks/[id]` - Delete a task
+
+## Development
+
+```bash
+# Install dependencies
+npm install
+
+# Run development server
+npm run dev
+
+# Run tests
+npm test
+
+# Build for production
+npm run build
+```
+
+## CI/CD Pipeline
+
+The project includes a comprehensive CI/CD pipeline with:
+
+1. **Linting & Build** - Code quality checks and build process
+2. **Unit Tests** - Jest-based unit testing with coverage
+3. **API Testing** - Keploy AI-powered API testing
+4. **Test Summary** - Comprehensive test results summary
+
+## Technologies Used
+
+- **Framework**: Next.js 14
+- **Database**: MongoDB with Mongoose
+- **Testing**: Jest, Supertest
+- **API Testing**: Keploy AI
+- **CI/CD**: GitHub Actions
+- **Documentation**: OpenAPI 3.0
+
+## Screenshots
+
+### Keploy Test Dashboard
+![Keploy Test Dashboard](tests/coverage-screenshot.png)
+
+*Note: Replace with actual Keploy dashboard screenshot once configured*
