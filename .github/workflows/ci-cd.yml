@@ -33,13 +33,6 @@ jobs:
     
     - name: Build application
       run: npm run build
-    
-    - name: Upload build artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: build-files
-        path: .next/
-        retention-days: 1
 
   # Unit tests job
   unit-tests:
@@ -93,9 +86,6 @@ jobs:
       working-directory: ./tests
       run: npm ci
     
-    - name: Build application
-      run: npm run build
-    
     - name: Install Keploy CLI
       run: |
         curl --silent -L https://keploy.io/ent/install.sh | bash
@@ -130,4 +120,5 @@ jobs:
         if [ "${{ needs.unit-tests.result }}" == "success" ] && [ "${{ needs.api-testing.result }}" == "success" ]; then
           echo "✅ All tests passed!" >> $GITHUB_STEP_SUMMARY
         else
-          echo "❌ Some tests failed" >> $GITHUB_STEP_SUMMARY 
+          echo "❌ Some tests failed" >> $GITHUB_STEP_SUMMARY
+        fi 
