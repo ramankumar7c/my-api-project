@@ -90,4 +90,13 @@ jspm_packages/
 
 # Temporary folders
 tmp/
-temp/ 
+temp/
+
+# Test files and temporary scripts
+test-api-local.sh
+keploy.zip
+*.test.local.sh
+
+# Keploy local files (not needed for cloud)
+keploy.yaml
+keploy-local/ 

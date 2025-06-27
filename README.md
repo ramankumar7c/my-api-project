@@ -442,6 +442,6 @@ The project includes a comprehensive CI/CD pipeline with:
 ## Screenshots
 
 ### Keploy Test Dashboard
-![Keploy Test Dashboard](tests/coverage-screenshot.png)
+![Keploy Test Dashboard](./keploy-dashboard.png)
 
-*Note: Replace with actual Keploy dashboard screenshot once configured*
+*Screenshot showing successful API tests in Keploy AI Testing platform*
