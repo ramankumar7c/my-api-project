@@ -381,10 +381,15 @@ This project integrates **Keploy AI API Testing** for intelligent API testing in
 - name: Run Keploy Test Suite
   run: |
     export KEPLOY_API_KEY=${{ secrets.KEPLOY_API_KEY }}
-    keploy test-suite --app=your-app-id --base-path http://localhost:3000/api --cloud
+    export KEPLOY_APP_ID=${{ secrets.KEPLOY_APP_ID }}
+    export KEPLOY_BASE_PATH=${{ secrets.KEPLOY_BASE_PATH }}
+    keploy test-suite --app=$KEPLOY_APP_ID --base-path $KEPLOY_BASE_PATH --cloud
 ```
 
-**⚠️ Important**: Replace `your-app-id` with your actual Keploy App ID from the dashboard.
+**⚠️ Required GitHub Secrets:**
+- `KEPLOY_API_KEY`: Your Keploy API key
+- `KEPLOY_APP_ID`: Your Keploy App ID (e.g., 10785d1f-5ea9-41e0-b896-699a35b4a143)
+- `KEPLOY_BASE_PATH`: Your API base URL (e.g., https://my-api-project-nu.vercel.app/api)
 
 ### Test Reports
 

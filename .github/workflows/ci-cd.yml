@@ -136,8 +136,9 @@ jobs:
     - name: Run Keploy Test Suite
       run: |
         export KEPLOY_API_KEY=${{ secrets.KEPLOY_API_KEY }}
-        # Note: Replace with your actual app ID and base path from Keploy Dashboard
-        keploy test-suite --app=your-app-id --base-path http://localhost:3000/api --cloud
+        export KEPLOY_APP_ID=${{ secrets.KEPLOY_APP_ID }}
+        export KEPLOY_BASE_PATH=${{ secrets.KEPLOY_BASE_PATH }}
+        keploy test-suite --app=$KEPLOY_APP_ID --base-path $KEPLOY_BASE_PATH --cloud
     
     - name: Stop application
       if: always()
