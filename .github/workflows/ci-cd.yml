@@ -104,11 +104,8 @@ jobs:
       working-directory: ./tests
       run: npm ci
     
-    - name: Download build artifacts
-      uses: actions/download-artifact@v4
-      with:
-        name: build-files
-        path: .next/
+    - name: Build application
+      run: npm run build
     
     - name: Install additional tools
       run: |
