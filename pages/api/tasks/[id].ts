@@ -3,6 +3,11 @@ import Task from '../../../models/Task';
 import type { NextApiRequest, NextApiResponse } from 'next';
 import mongoose from 'mongoose';
 
+interface UpdateData {
+  title?: string;
+  completed?: boolean;
+}
+
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
     await dbConnect();
@@ -41,7 +46,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         });
       }
 
-      const updateData: any = {};
+      const updateData: UpdateData = {};
       if (title !== undefined) updateData.title = title.trim();
       if (completed !== undefined) updateData.completed = completed;
 
