@@ -76,17 +76,6 @@ jobs:
   api-testing:
     runs-on: ubuntu-latest
     
-    services:
-      mongodb:
-        image: mongo:6.0
-        ports:
-          - 27017:27017
-        options: >-
-          --health-cmd "mongosh --eval 'db.runCommand({ping: 1})'"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-    
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -111,42 +100,12 @@ jobs:
       run: |
         curl --silent -L https://keploy.io/ent/install.sh | bash
     
-    - name: Start MongoDB and wait for it to be ready
-      run: |
-        echo "Waiting for MongoDB to be ready..."
-        timeout 60 bash -c 'until mongosh --eval "db.runCommand({ping: 1})" > /dev/null 2>&1; do sleep 2; done'
-        echo "MongoDB is ready!"
-    
-    - name: Start application in background
-      run: |
-        export MONGODB_URI=mongodb://localhost:27017/task-management-test
-        export NODE_ENV=test
-        npm run dev &
-        echo $! > app.pid
-        sleep 15  # Wait for app to start
-        
-        # Check if app is running
-        if curl -f http://localhost:3000/api/tasks > /dev/null 2>&1; then
-          echo "Application is running successfully"
-        else
-          echo "Application failed to start"
-          exit 1
-        fi
-    
     - name: Run Keploy Test Suite
       run: |
         export KEPLOY_API_KEY=${{ secrets.KEPLOY_API_KEY }}
         export KEPLOY_APP_ID=${{ secrets.KEPLOY_APP_ID }}
         export KEPLOY_BASE_PATH=${{ secrets.KEPLOY_BASE_PATH }}
         keploy test-suite --app=$KEPLOY_APP_ID --base-path $KEPLOY_BASE_PATH --cloud
-    
-    - name: Stop application
-      if: always()
-      run: |
-        if [ -f app.pid ]; then
-          kill $(cat app.pid) || true
-          rm app.pid
-        fi
 
   # Test summary job
   test-summary:
